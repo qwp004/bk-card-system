@@ -565,8 +565,9 @@ async function syncToGist() {
 
     showToast('正在同步...');
 
-    // 加密数据
-    const encryptedData = xorEncrypt(JSON.stringify(keys), encryptKey);
+    // 加密数据（Base64编码，兼容Lua DecodeBase64直接解析）
+    const jsonData = JSON.stringify(keys);
+    const encryptedData = btoa(unescape(encodeURIComponent(jsonData)));
     const content = `-- BK四合一卡密数据\n-- 加密存储，请勿手动修改\n-- 更新时间: ${new Date().toISOString()}\nKEY_DATA = "${encryptedData}"\n`;
 
     try {
@@ -645,7 +646,7 @@ async function loadFromGist() {
         const match = file.content.match(/KEY_DATA\s*=\s*"([^"]+)"/);
         if (!match) throw new Error('数据格式错误');
 
-        const decrypted = xorDecrypt(match[1], encryptKey);
+        const decrypted = decodeURIComponent(escape(atob(match[1])));
         const loadedKeys = JSON.parse(decrypted);
 
         if (confirm(`拉取到 ${loadedKeys.length} 张卡密，是否合并到本地？\n（相同卡密会更新，不同的会添加）`)) {
