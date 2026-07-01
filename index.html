@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BK 四合一卡密管理系统</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    padding: 20px;
+    color: #fff;
+}
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.header {
+    text-align: center;
+    padding: 30px 0;
+}
+.header h1 {
+    font-size: 32px;
+    background: linear-gradient(90deg, #00d4ff, #7b2cff, #ff2c9c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+.header p { color: #8892b0; font-size: 14px; }
+.card {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+.card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.card-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: linear-gradient(180deg, #00d4ff, #7b2cff);
+    border-radius: 2px;
+}
+.row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 120px; }
+label {
+    display: block;
+    font-size: 13px;
+    color: #a8b2d1;
+    margin-bottom: 6px;
+}
+input, select {
+    width: 100%;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+input:focus, select:focus {
+    border-color: #00d4ff;
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.15);
+}
+select option { background: #1a1a2e; color: #fff; }
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background: linear-gradient(135deg, #00d4ff, #7b2cff);
+    color: #fff;
+    width: 100%;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(123,44,255,0.4); }
+.btn-primary:active { transform: translateY(0); }
+.btn-success {
+    background: linear-gradient(135deg, #00ff88, #00c86f);
+    color: #fff;
+}
+.btn-danger {
+    background: linear-gradient(135deg, #ff4444, #cc0000);
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 12px;
+}
+.btn-secondary {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.btn-secondary:hover { background: rgba(255,255,255,0.15); }
+.settings-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100;
+}
+.settings-btn:hover { background: rgba(255,255,255,0.2); }
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+}
+.modal.active { display: flex; }
+.modal-content {
+    background: #1a1a2e;
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+.modal-content h2 { margin-bottom: 16px; font-size: 20px; }
+.table-container {
+    overflow-x: auto;
+    margin-top: 12px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+th {
+    background: rgba(255,255,255,0.05);
+    color: #a8b2d1;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+tr:hover { background: rgba(255,255,255,0.03); }
+.status-active { color: #00ff88; font-weight: 600; }
+.status-inactive { color: #ff6b6b; }
+.status-expired { color: #ffb84d; }
+.code-cell {
+    font-family: 'Courier New', monospace;
+    cursor: pointer;
+    color: #00d4ff;
+}
+.code-cell:hover { text-decoration: underline; }
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: rgba(0,0,0,0.9);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    z-index: 300;
+    opacity: 0;
+    transition: all 0.3s;
+}
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.stat-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+}
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #00d4ff, #7b2cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.stat-label {
+    font-size: 12px;
+    color: #8892b0;
+    margin-top: 4px;
+}
+.script-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.script-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(0,212,255,0.15);
+    color: #00d4ff;
+    border: 1px solid rgba(0,212,255,0.3);
+}
+</style>
+</head>
+<body>
+
+<div class="settings-btn" onclick="openSettings()" title="设置">⚙️</div>
+
+<div class="container">
+    <div class="header">
+        <h1>🎫 BK 四合一卡密管理系统</h1>
+        <p>通用卡密 · 战斗脚本 / 小猫脚本 / UTMM中文 / NPC选项</p>
+    </div>
+
+    <!-- 生成卡密 -->
+    <div class="card">
+        <div class="card-title">生成卡密</div>
+        <div class="row">
+            <div>
+                <label>卡密时长</label>
+                <select id="duration">
+                    <option value="1">1天</option>
+                    <option value="7">7天</option>
+                    <option value="30" selected>30天</option>
+                    <option value="90">90天</option>
+                    <option value="180">180天</option>
+                    <option value="365">365天</option>
+                    <option value="9999">永久</option>
+                </select>
+            </div>
+            <div>
+                <label>生成数量</label>
+                <input type="number" id="count" value="1" min="1" max="100">
+            </div>
+        </div>
+        <div class="row">
+            <div>
+                <label>备注（可选）</label>
+                <input type="text" id="note" placeholder="比如：张三的卡密">
+            </div>
+        </div>
+        <button class="btn-primary" onclick="generateKeys()">✨ 生成卡密</button>
+    </div>
+
+    <!-- 统计 -->
+    <div class="card">
+        <div class="card-title">数据统计</div>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="statTotal">0</div>
+                <div class="stat-label">总卡密数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statActive" style="background: linear-gradient(135deg, #00ff88, #00c86f); -webkit-background-clip: text; background-clip: text;">0</div>
+                <div class="stat-label">有效卡密</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statUsed" style="background: linear-gradient(135deg, #ff6b6b, #cc0000); -webkit-background-clip: text; background-clip: text;">0</div>
+                <div class="stat-label">已使用</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="statExpired" style="background: linear-gradient(135deg, #ffb84d, #ff8c00); -webkit-background-clip: text; background-clip: text;">0</div>
+                <div class="stat-label">已过期</div>
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn-secondary" onclick="syncToGist()">☁️ 同步到 GitHub</button>
+            <button class="btn-secondary" onclick="loadFromGist()">📥 从 GitHub 拉取</button>
+        </div>
+    </div>
+
+    <!-- 卡密列表 -->
+    <div class="card">
+        <div class="card-title">卡密列表</div>
+        <div class="row">
+            <div>
+                <label>筛选状态</label>
+                <select id="filterStatus" onchange="renderKeys()">
+                    <option value="all">全部</option>
+                    <option value="active">有效</option>
+                    <option value="used">已使用</option>
+                    <option value="expired">已过期</option>
+                </select>
+            </div>
+            <div>
+                <label>搜索卡密</label>
+                <input type="text" id="searchKey" placeholder="输入卡密关键词..." oninput="renderKeys()">
+            </div>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>卡密</th>
+                        <th>时长</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>过期时间</th>
+                        <th>绑定机器</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="keyTable">
+                    <tr><td colspan="8" style="text-align:center;color:#8892b0;padding:30px;">暂无卡密数据</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 设置弹窗 -->
+<div class="modal" id="settingsModal">
+    <div class="modal-content">
+        <h2>⚙️ 设置</h2>
+        <div style="margin-bottom: 16px;">
+            <label>GitHub Token</label>
+            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxx">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label>卡密数据 Gist ID（留空自动创建）</label>
+            <input type="text" id="gistId" placeholder="留空自动创建新 Gist">
+        </div>
+        <div style="margin-bottom: 16px;">
+            <label>加密密钥（用于加密卡密数据）</label>
+            <input type="text" id="encryptKey" value="BK_Script_Key_2024!">
+        </div>
+        <div class="row">
+            <button class="btn-secondary" onclick="saveSettings()">保存设置</button>
+            <button class="btn-danger" onclick="closeSettings()" style="flex:0 0 auto;">关闭</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 数据存储 =====
+let keys = JSON.parse(localStorage.getItem('bk_keys') || '[]');
+
+function saveSettings() {
+    localStorage.setItem('bk_token', document.getElementById('githubToken').value);
+    localStorage.setItem('bk_gist_id', document.getElementById('gistId').value);
+    localStorage.setItem('bk_encrypt_key', document.getElementById('encryptKey').value);
+    showToast('设置已保存');
+    closeSettings();
+}
+
+function loadSettings() {
+    document.getElementById('githubToken').value = localStorage.getItem('bk_token') || '';
+    document.getElementById('gistId').value = localStorage.getItem('bk_gist_id') || '';
+    document.getElementById('encryptKey').value = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+}
+
+function openSettings() {
+    loadSettings();
+    document.getElementById('settingsModal').classList.add('active');
+}
+
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('active');
+}
+
+// ===== 工具函数 =====
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function generateKeyCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let key = 'BK-';
+    for (let g = 0; g < 3; g++) {
+        for (let i = 0; i < 4; i++) {
+            key += chars[Math.floor(Math.random() * chars.length)];
+        }
+        if (g < 2) key += '-';
+    }
+    return key;
+}
+
+function xorEncrypt(text, key) {
+    let result = '';
+    for (let i = 0; i < text.length; i++) {
+        result += String.fromCharCode(text.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+    }
+    return btoa(unescape(encodeURIComponent(result)));
+}
+
+function xorDecrypt(encoded, key) {
+    try {
+        const decoded = decodeURIComponent(escape(atob(encoded)));
+        let result = '';
+        for (let i = 0; i < decoded.length; i++) {
+            result += String.fromCharCode(decoded.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+        }
+        return result;
+    } catch(e) {
+        return '';
+    }
+}
+
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('已复制到剪贴板');
+    });
+}
+
+// ===== 卡密管理 =====
+function generateKeys() {
+    const duration = parseInt(document.getElementById('duration').value);
+    const count = parseInt(document.getElementById('count').value);
+    const note = document.getElementById('note').value;
+
+    if (count < 1 || count > 100) {
+        showToast('数量必须在 1~100 之间');
+        return;
+    }
+
+    const now = Date.now();
+    const newKeys = [];
+
+    for (let i = 0; i < count; i++) {
+        const code = generateKeyCode();
+        newKeys.push({
+            code: code,
+            duration: duration,
+            note: note,
+            createdAt: now,
+            expiresAt: duration === 9999 ? 9999999999999 : now + duration * 24 * 60 * 60 * 1000,
+            used: false,
+            usedAt: null,
+            machineId: null,
+            scripts: ['combat', 'cat', 'utmm', 'npc']
+        });
+    }
+
+    keys = [...newKeys, ...keys];
+    localStorage.setItem('bk_keys', JSON.stringify(keys));
+    renderKeys();
+    showToast(`成功生成 ${count} 张卡密`);
+}
+
+function getStatus(key) {
+    const now = Date.now();
+    if (key.used && now > key.expiresAt) return 'expired';
+    if (key.used) return 'used';
+    if (now > key.expiresAt) return 'expired';
+    return 'active';
+}
+
+function getStatusText(status) {
+    switch(status) {
+        case 'active': return '<span class="status-active">✅ 有效</span>';
+        case 'used': return '<span style="color:#00d4ff">📌 已使用</span>';
+        case 'expired': return '<span class="status-expired">⏰ 已过期</span>';
+        default: return status;
+    }
+}
+
+function formatDate(ts) {
+    if (ts === 9999999999999) return '永久';
+    const d = new Date(ts);
+    return `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function deleteKey(code) {
+    if (!confirm('确定删除这张卡密吗？')) return;
+    keys = keys.filter(k => k.code !== code);
+    localStorage.setItem('bk_keys', JSON.stringify(keys));
+    renderKeys();
+    showToast('已删除');
+}
+
+function renderKeys() {
+    const filter = document.getElementById('filterStatus').value;
+    const search = document.getElementById('searchKey').value.toLowerCase();
+
+    let filtered = keys.filter(k => {
+        const status = getStatus(k);
+        if (filter !== 'all' && status !== filter) return false;
+        if (search && !k.code.toLowerCase().includes(search) && !(k.note && k.note.toLowerCase().includes(search))) return false;
+        return true;
+    });
+
+    const tbody = document.getElementById('keyTable');
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#8892b0;padding:30px;">暂无卡密数据</td></tr>';
+        updateStats();
+        return;
+    }
+
+    tbody.innerHTML = filtered.map(k => `
+        <tr>
+            <td class="code-cell" onclick="copyToClipboard('${k.code}')" title="点击复制">${k.code}</td>
+            <td>${k.duration === 9999 ? '永久' : k.duration + '天'}</td>
+            <td>${getStatusText(getStatus(k))}</td>
+            <td>${formatDate(k.createdAt)}</td>
+            <td>${formatDate(k.expiresAt)}</td>
+            <td>${k.machineId ? k.machineId.slice(0,8) + '...' : '-'}</td>
+            <td>${k.note || '-'}</td>
+            <td><button class="btn-danger" onclick="deleteKey('${k.code}')">删除</button></td>
+        </tr>
+    `).join('');
+
+    updateStats();
+}
+
+function updateStats() {
+    const now = Date.now();
+    document.getElementById('statTotal').textContent = keys.length;
+    document.getElementById('statActive').textContent = keys.filter(k => !k.used && now <= k.expiresAt).length;
+    document.getElementById('statUsed').textContent = keys.filter(k => k.used).length;
+    document.getElementById('statExpired').textContent = keys.filter(k => now > k.expiresAt && k.expiresAt !== 9999999999999).length;
+}
+
+// ===== GitHub Gist 同步 =====
+async function syncToGist() {
+    const token = localStorage.getItem('bk_token');
+    const gistId = localStorage.getItem('bk_gist_id');
+    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+
+    if (!token) {
+        showToast('请先设置 GitHub Token');
+        openSettings();
+        return;
+    }
+
+    showToast('正在同步...');
+
+    // 加密数据
+    const encryptedData = xorEncrypt(JSON.stringify(keys), encryptKey);
+    const content = `-- BK四合一卡密数据\n-- 加密存储，请勿手动修改\n-- 更新时间: ${new Date().toISOString()}\nKEY_DATA = "${encryptedData}"\n`;
+
+    try {
+        let gist_id = gistId;
+
+        // 如果没有 Gist ID，创建新的
+        if (!gist_id) {
+            const resp = await fetch('https://api.github.com/gists', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    description: 'BK四合一卡密数据',
+                    public: false,
+                    files: {
+                        'bk_key_data.lua': { content: content }
+                    }
+                })
+            });
+
+            if (!resp.ok) throw new Error('创建 Gist 失败: ' + resp.status);
+            const data = await resp.json();
+            gist_id = data.id;
+            localStorage.setItem('bk_gist_id', gist_id);
+            document.getElementById('gistId').value = gist_id;
+        } else {
+            // 更新已有 Gist
+            const resp = await fetch(`https://api.github.com/gists/${gist_id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: {
+                        'bk_key_data.lua': { content: content }
+                    }
+                })
+            });
+
+            if (!resp.ok) throw new Error('更新 Gist 失败: ' + resp.status);
+        }
+
+        showToast('✅ 同步成功！Gist ID: ' + gist_id.slice(0,8) + '...');
+    } catch(e) {
+        showToast('同步失败: ' + e.message);
+        console.error(e);
+    }
+}
+
+async function loadFromGist() {
+    const token = localStorage.getItem('bk_token');
+    const gistId = localStorage.getItem('bk_gist_id');
+    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+
+    if (!token || !gistId) {
+        showToast('请先设置 Token 和 Gist ID');
+        return;
+    }
+
+    showToast('正在拉取...');
+
+    try {
+        const resp = await fetch(`https://api.github.com/gists/${gistId}`, {
+            headers: { 'Authorization': `token ${token}` }
+        });
+
+        if (!resp.ok) throw new Error('拉取失败: ' + resp.status);
+        const data = await resp.json();
+        const file = data.files['bk_key_data.lua'];
+        if (!file) throw new Error('找不到卡密数据文件');
+
+        // 提取加密数据
+        const match = file.content.match(/KEY_DATA\s*=\s*"([^"]+)"/);
+        if (!match) throw new Error('数据格式错误');
+
+        const decrypted = xorDecrypt(match[1], encryptKey);
+        const loadedKeys = JSON.parse(decrypted);
+
+        if (confirm(`拉取到 ${loadedKeys.length} 张卡密，是否合并到本地？\n（相同卡密会更新，不同的会添加）`)) {
+            // 合并：以 code 为 key 更新
+            const map = {};
+            keys.forEach(k => map[k.code] = k);
+            loadedKeys.forEach(k => map[k.code] = k);
+            keys = Object.values(map).sort((a,b) => b.createdAt - a.createdAt);
+            localStorage.setItem('bk_keys', JSON.stringify(keys));
+            renderKeys();
+            showToast('拉取并合并成功');
+        }
+    } catch(e) {
+        showToast('拉取失败: ' + e.message);
+        console.error(e);
+    }
+}
+
+// ===== 初始化 =====
+loadSettings();
+renderKeys();
+
+// 点击弹窗外部关闭
+document.getElementById('settingsModal').addEventListener('click', (e) => {
+    if (e.target.id === 'settingsModal') closeSettings();
+});
+</script>
+
+</body>
+</html>
