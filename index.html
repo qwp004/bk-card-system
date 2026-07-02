@@ -350,7 +350,7 @@ tr:hover { background: rgba(255,255,255,0.03); }
         <h2>⚙️ 设置</h2>
         <div style="margin-bottom: 16px;">
             <label>GitHub Token</label>
-            <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxx">
+            <input type="text" id="githubToken" placeholder="ghp_xxxxxxxxxx" autocomplete="off">
         </div>
         <div style="margin-bottom: 16px;">
             <label>卡密数据 Gist ID（留空自动创建）</label>
@@ -374,16 +374,16 @@ tr:hover { background: rgba(255,255,255,0.03); }
 let keys = JSON.parse(localStorage.getItem('bk_keys') || '[]');
 
 function saveSettings() {
-    localStorage.setItem('cat_token', document.getElementById('githubToken').value);
-    localStorage.setItem('cat_gist_id', document.getElementById('gistId').value);
+    localStorage.setItem('bk_token', document.getElementById('githubToken').value);
+    localStorage.setItem('bk_gist_id', document.getElementById('gistId').value);
     localStorage.setItem('bk_encrypt_key', document.getElementById('encryptKey').value);
     showToast('设置已保存');
     closeSettings();
 }
 
 function loadSettings() {
-    document.getElementById('githubToken').value = localStorage.getItem('cat_token') || '';
-    document.getElementById('gistId').value = localStorage.getItem('cat_gist_id') || '';
+    document.getElementById('githubToken').value = localStorage.getItem('bk_token') || '';
+    document.getElementById('gistId').value = localStorage.getItem('bk_gist_id') || '';
     document.getElementById('encryptKey').value = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 }
 
@@ -553,8 +553,8 @@ function updateStats() {
 
 // ===== GitHub Gist 同步 =====
 async function syncToGist() {
-    const token = localStorage.getItem('cat_token');
-    const gistId = localStorage.getItem('cat_gist_id');
+    const token = localStorage.getItem('bk_token');
+    const gistId = localStorage.getItem('bk_gist_id');
     const encryptKey = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 
     if (!token) {
@@ -593,7 +593,7 @@ async function syncToGist() {
             if (!resp.ok) throw new Error('创建 Gist 失败: ' + resp.status);
             const data = await resp.json();
             gist_id = data.id;
-            localStorage.setItem('cat_gist_id', gist_id);
+            localStorage.setItem('bk_gist_id', gist_id);
             document.getElementById('gistId').value = gist_id;
         } else {
             // 更新已有 Gist
@@ -621,8 +621,8 @@ async function syncToGist() {
 }
 
 async function loadFromGist() {
-    const token = localStorage.getItem('cat_token');
-    const gistId = localStorage.getItem('cat_gist_id');
+    const token = localStorage.getItem('bk_token');
+    const gistId = localStorage.getItem('bk_gist_id');
     const encryptKey = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 
     if (!token || !gistId) {
