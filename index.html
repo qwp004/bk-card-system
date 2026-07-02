@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BK 四合一卡密管理系统</title>
+<title>CAT HUB 卡密管理系统</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
 body {
@@ -243,7 +243,7 @@ tr:hover { background: rgba(255,255,255,0.03); }
 
 <div class="container">
     <div class="header">
-        <h1>🎫 BK 四合一卡密管理系统</h1>
+        <h1>🎫 CAT HUB 卡密管理系统</h1>
         <p>通用卡密 · 战斗脚本 / 小猫脚本 / UTMM中文 / NPC选项</p>
     </div>
 
@@ -358,7 +358,7 @@ tr:hover { background: rgba(255,255,255,0.03); }
         </div>
         <div style="margin-bottom: 16px;">
             <label>加密密钥（用于加密卡密数据）</label>
-            <input type="text" id="encryptKey" value="BK_Script_Key_2024!">
+            <input type="text" id="encryptKey" value="CAT_Script_Key_2024!">
         </div>
         <div class="row">
             <button class="btn-secondary" onclick="saveSettings()">保存设置</button>
@@ -374,17 +374,17 @@ tr:hover { background: rgba(255,255,255,0.03); }
 let keys = JSON.parse(localStorage.getItem('bk_keys') || '[]');
 
 function saveSettings() {
-    localStorage.setItem('bk_token', document.getElementById('githubToken').value);
-    localStorage.setItem('bk_gist_id', document.getElementById('gistId').value);
+    localStorage.setItem('cat_token', document.getElementById('githubToken').value);
+    localStorage.setItem('cat_gist_id', document.getElementById('gistId').value);
     localStorage.setItem('bk_encrypt_key', document.getElementById('encryptKey').value);
     showToast('设置已保存');
     closeSettings();
 }
 
 function loadSettings() {
-    document.getElementById('githubToken').value = localStorage.getItem('bk_token') || '';
-    document.getElementById('gistId').value = localStorage.getItem('bk_gist_id') || '';
-    document.getElementById('encryptKey').value = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+    document.getElementById('githubToken').value = localStorage.getItem('cat_token') || '';
+    document.getElementById('gistId').value = localStorage.getItem('cat_gist_id') || '';
+    document.getElementById('encryptKey').value = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 }
 
 function openSettings() {
@@ -553,9 +553,9 @@ function updateStats() {
 
 // ===== GitHub Gist 同步 =====
 async function syncToGist() {
-    const token = localStorage.getItem('bk_token');
-    const gistId = localStorage.getItem('bk_gist_id');
-    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+    const token = localStorage.getItem('cat_token');
+    const gistId = localStorage.getItem('cat_gist_id');
+    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 
     if (!token) {
         showToast('请先设置 GitHub Token');
@@ -568,7 +568,7 @@ async function syncToGist() {
     // 加密数据（Base64编码，兼容Lua DecodeBase64直接解析）
     const jsonData = JSON.stringify(keys);
     const encryptedData = btoa(unescape(encodeURIComponent(jsonData)));
-    const content = `-- BK四合一卡密数据\n-- 加密存储，请勿手动修改\n-- 更新时间: ${new Date().toISOString()}\nKEY_DATA = "${encryptedData}"\n`;
+    const content = `-- CAT HUB卡密数据\n-- 加密存储，请勿手动修改\n-- 更新时间: ${new Date().toISOString()}\nKEY_DATA = "${encryptedData}"\n`;
 
     try {
         let gist_id = gistId;
@@ -582,7 +582,7 @@ async function syncToGist() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    description: 'BK四合一卡密数据',
+                    description: 'CAT HUB卡密数据',
                     public: false,
                     files: {
                         'bk_key_data.lua': { content: content }
@@ -593,7 +593,7 @@ async function syncToGist() {
             if (!resp.ok) throw new Error('创建 Gist 失败: ' + resp.status);
             const data = await resp.json();
             gist_id = data.id;
-            localStorage.setItem('bk_gist_id', gist_id);
+            localStorage.setItem('cat_gist_id', gist_id);
             document.getElementById('gistId').value = gist_id;
         } else {
             // 更新已有 Gist
@@ -621,9 +621,9 @@ async function syncToGist() {
 }
 
 async function loadFromGist() {
-    const token = localStorage.getItem('bk_token');
-    const gistId = localStorage.getItem('bk_gist_id');
-    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'BK_Script_Key_2024!';
+    const token = localStorage.getItem('cat_token');
+    const gistId = localStorage.getItem('cat_gist_id');
+    const encryptKey = localStorage.getItem('bk_encrypt_key') || 'CAT_Script_Key_2024!';
 
     if (!token || !gistId) {
         showToast('请先设置 Token 和 Gist ID');
